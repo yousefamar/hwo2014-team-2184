@@ -26,6 +26,8 @@ function send(json) {
 
 jsonStream = client.pipe(JSONStream.parse());
 
+var startMoment = null;
+
 jsonStream.on('data', function(data) {
   if (data.msgType === 'carPositions') {
     send({
@@ -36,9 +38,13 @@ jsonStream.on('data', function(data) {
     if (data.msgType === 'join') {
       console.log('Joined')
     } else if (data.msgType === 'gameStart') {
-      console.log('Race started (' + moment().format() + ')');
+      startMoment = moment();
+      console.log('Race started (' + startMoment.format() + ')');
     } else if (data.msgType === 'gameEnd') {
-      console.log('Race ended (' + moment().format() + ')');
+      var endMoment = moment();
+      var duration = moment.duration(endMoment.diff(startMoment));
+      console.log('Race ended (' + endMoment.format() + ')');
+      console.log('Duration: ' + duration.humanize());
     } 
 
     send({
