@@ -50,3 +50,4 @@ jsonStream.on('data', function(data) {
 jsonStream.on('error', function() {
   return console.log("disconnected");
 });
+// vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2
