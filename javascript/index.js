@@ -1,5 +1,6 @@
 var net = require("net");
 var JSONStream = require('JSONStream');
+var moment = require("moment");
 
 var serverHost = process.argv[2];
 var serverPort = process.argv[3];
@@ -35,9 +36,9 @@ jsonStream.on('data', function(data) {
     if (data.msgType === 'join') {
       console.log('Joined')
     } else if (data.msgType === 'gameStart') {
-      console.log('Race started');
+      console.log('Race started (' + moment().format() + ')');
     } else if (data.msgType === 'gameEnd') {
-      console.log('Race ended');
+      console.log('Race ended (' + moment().format() + ')');
     } 
 
     send({
