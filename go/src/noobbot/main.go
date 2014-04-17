@@ -78,8 +78,7 @@ func dispatch_msg(writer *bufio.Writer, msgtype string, data interface{}) (err e
 		send_ping(writer)
 	case "gameEnd":
 		log.Printf("Game ended")
-		// Exit is not strictly necessary?
-		os.Exit(0)
+		send_ping(writer)
 	case "carPositions":
 		send_throttle(writer, 0.5)
 	case "error":
