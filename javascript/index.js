@@ -1,6 +1,7 @@
 var net = require("net");
 var JSONStream = require('JSONStream');
 var moment = require("moment");
+var visualiser = require('./visualiser.js');
 
 var serverHost = process.argv[2];
 var serverPort = process.argv[3];
@@ -10,6 +11,9 @@ var botKey = process.argv[5];
 console.log("I'm", botName, "and connect to", serverHost + ":" + serverPort);
 
 client = net.connect(serverPort, serverHost, function() {
+
+  visualiser.init();
+
   return send({
     msgType: "join",
     data: {
@@ -29,6 +33,9 @@ jsonStream = client.pipe(JSONStream.parse());
 var startMoment = null;
 
 jsonStream.on('data', function(data) {
+
+  visualiser.update(data);
+
   if (data.msgType === 'carPositions') {
     send({
       msgType: "throttle",
