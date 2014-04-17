@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "example hwo2014 bot",
   "main": "index.js",
+  "repository" : "https://bitbucket.org/hwo2014/hwo2014-team-2184",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
