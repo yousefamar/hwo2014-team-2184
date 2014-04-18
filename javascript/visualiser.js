@@ -1,33 +1,32 @@
 var http = require('http');
-var fs = require('fs');
 var open = require('open');
-var io = require('socket.io');
+var shoe = require('shoe');
+var ecstatic = require('ecstatic')('visualiser');
 
-var socket = null;
+var lastStream = null;
 
 module.exports = {
 
-  init: function () {
-    port = 8000;
+  init: function (port) {
+    port = port || 8000;
+    
+    var server = http.createServer(ecstatic);
+    server.listen(port);
+    
+    var sock = shoe(function (stream) {
+      lastStream = stream;
 
-    http.createServer(function (req, res) {
-      // Super dangerous, plase look away
-      if (req.url !== '/favicon.ico')
-        fs.createReadStream('visualiser'+req.url).pipe(res);
-    }).listen(port);
+      stream.on('end', function () {
+      });
 
-    io = io.listen(port+1);
-    io.sockets.on('connection', function (sock) {
-      console.log('Connected to client');
-      socket = sock;
+      //stream.pipe(process.stdout, { end : false });
     });
+    sock.install(server, '/racedata');
 
     open('http://localhost:'+port+'/index.html');
   },
 
   update: function(data) {
-    // TODO: Make sure init'd
-
-    socket && socket.emit('data', data);
+    lastStream && lastStream.write(JSON.stringify(data));
   }
 };

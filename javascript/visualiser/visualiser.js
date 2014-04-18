@@ -1,8 +1,13 @@
 VIS = {};
 
-VIS.main = function () {
-  var socket = io.connect('http://localhost:8001');
-  socket.on('data', function (data) {
-    console.log(data);
-  });
-};
+VIS.main = (function () {
+  var shoe = require('shoe');
+  var through = require('through');
+
+  return function () {
+    var stream = shoe('/racedata');
+    stream.pipe(through(function (data) {
+        console.log(JSON.parse(data));
+    }));
+  };
+})();
