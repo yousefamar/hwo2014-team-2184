@@ -1,5 +1,0 @@
-#!/bin/sh
-
-# Watch LiveScript files for changes and compiles them immediately as they're
-# changed
-./node_modules/LiveScript/bin/lsc -cw *.ls

@@ -2,4 +2,6 @@
 
 source ../scripts/check_pl_args
 
-node index.js "$@"
+INTERPRETER="./node_modules/LiveScript/bin/lsc"
+
+$INTERPRETER index.ls "$@"

@@ -7,6 +7,3 @@ if [ "$BUILD_MODE" == "offline" ]; then
 else
   npm install
 fi
-
-# Compile LiveScript sources using the local LiveScript install
-./node_modules/LiveScript/bin/lsc -c *.ls
