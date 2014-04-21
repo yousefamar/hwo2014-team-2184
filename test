@@ -1,2 +1,5 @@
 #!/bin/bash
-./run testserver.helloworldopen.com 8091
+./run senna.helloworldopen.com 8091
+
+# Using `senna` directly for now instead of `loadbalancer`, as the latter looks
+# to be down.
