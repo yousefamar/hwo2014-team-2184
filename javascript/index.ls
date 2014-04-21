@@ -1,7 +1,7 @@
 net = require \net
 JSON-stream = require \JSONStream
 moment = require \moment
-visualiser = require \./visualiser.js
+visualiser = require \./visualiser.ls
 
 server-host = process.argv.2
 server-port = process.argv.3
