@@ -1,24 +1,19 @@
-http = require \http
-open = require \open
-shoe = require \shoe
+require! <[ http open shoe ]>
 ecstatic = (require \ecstatic) \visualiser
 
-last-stream = null
+init = (port=8000) ->
 
-module.exports =
+  last-stream = null
 
-  init : (port=8000) ->
-    server = http.create-server ecstatic
-    server.listen port
+  server = http.create-server ecstatic
+    ..listen port
 
-    sock = shoe (stream) ->
-      last-stream := stream
+  sock = shoe -> last-stream := it
+  sock.install server, \/racedata
 
-      stream.on \end ->
-      #stream.pipe(process.stdout, { end : false });
-    sock.install server, \/racedata
+  open "http://localhost:#port/index.html"
 
-    open "http://localhost:#port/index.html"
+  # Return update function
+  (data) -> last-stream?write JSON.stringify data
 
-  update : (data) ->
-    last-stream && last-stream.write JSON.stringify data
+module.exports = init
