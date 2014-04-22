@@ -1,0 +1,3 @@
+#!/bin/bash
+# Browserify-compile LiveScript into browser bundle
+watchify --verbose --debug -t liveify -o bundle.js main.ls
