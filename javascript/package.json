@@ -3,11 +3,20 @@
   "version": "0.0.1",
   "description": "example hwo2014 bot",
   "main": "index.js",
-  "repository" : "https://bitbucket.org/hwo2014/hwo2014-team-2184",
+  "repository": "https://bitbucket.org/hwo2014/hwo2014-team-2184",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
-    "JSONStream":    "0.6.4"
+    "JSONStream": "^0.6.4",
+    "open": "0.0.5",
+    "split": "^0.3.0",
+    "mkdirp": "^0.3.5",
+    "moment": "^2.6.0",
+    "LiveScript": "^1.2.0",
+    "ecstatic": "^0.5.1",
+    "shoe": "0.0.15",
+    "through": "^2.3.4",
+    "liveify": "^0.4.0"
   }
 }
