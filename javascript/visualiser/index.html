@@ -5,6 +5,19 @@
   <title>HWO Visualiser</title>
 </head>
 <body>
+  <style>
+    body { font-size : 10pt; color : #888; }
+    .stat-value { font-size : 120%; color : darkred; }
+  </style>
+  <div id="stats">
+      <p>This race is <span class="stat-value" id="game-state"></span>. There
+      are <span class="stat-value" id="n-cars"></span> cars racing for <span
+          class="stat-value" id="max-laps"></span> laps on <span
+          class="stat-value" id="track-id"></span>, which has <span
+          class="stat-value" id="track-n-pieces"></span> pieces (<span
+          class="stat-value" id="track-n-curves"></span> curved; <span
+          class="stat-value" id="track-n-straights"></span> straight).</p>
+  </div>
   <script src="bundle.js"></script>
 </body>
 </html>
