@@ -1,7 +1,7 @@
 require! \net
 JSON-stream = require \JSONStream
-require! \moment
 racelog = (require \./racelog.ls)!
+actuate = require \./ai.ls
 
 log = console.log
 
@@ -20,24 +20,6 @@ start-moment = null
 client
   ..pipe racelog
   ..pipe JSON-stream.parse!
-    ..on \data (data) ->
-
-      if data.msg-type is \carPositions
-        send \throttle 0.5
-      else
-        switch data.msg-type
-        | \join => log "Joined"
-        | \gameStart =>
-          start-moment := moment!
-          log "Race started (#{start-moment.format!})"
-        | \gameEnd =>
-          end-moment = moment!
-          duration = moment.duration (end-moment.diff start-moment)
-          log "Race ended (#{end-moment.format!})"
-          log "Duration: #{duration.humanize!}"
-
-        send \ping
-
-    ..on \error -> console.log "disconnected"
+    ..on \data (data) -> actuate data |> send.apply null, _
 
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2
