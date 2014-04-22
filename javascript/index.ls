@@ -18,10 +18,10 @@ send = (payload) ->
   client.write JSON.stringify { msg-type, data }
   client.write "\n"
 
-start-moment = null
 client
   ..pipe racelog
   ..pipe JSON-stream.parse!
     ..on \data -> actuate it |> send
+    ..on \error -> console.log "disconnected"
 
 # vim: tabstop=2 expandtab shiftwidth=2 softtabstop=2
