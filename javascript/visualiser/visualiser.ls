@@ -1,6 +1,6 @@
-VIS = {}
+window.VIS = {}
 
-VIS.main = (->
+window.VIS.main = do
 
   shoe = require 'shoe'
   through = require 'through'
@@ -8,8 +8,8 @@ VIS.main = (->
   divs = {}
 
   ->
-    stream = shoe '/racedata'
-    through (data) !->
+    shoe '/racedata' .pipe through (data) ->
+      console.dir data
       msg = JSON.parse data
 
       if msg.msgType of divs
@@ -19,5 +19,3 @@ VIS.main = (->
         div = divs[msg.msgType] = document.createElement 'div'
         div.innerHTML = data;
         document.body.appendChild div
-    |> stream.pipe
-)!

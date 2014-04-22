@@ -1,0 +1,10 @@
+#!/bin/bash
+
+if [ -d logs ]
+then
+    # Visualise latest race log (by file timestamp, not name)
+    LATEST_LOG=$( ls --sort=time logs/* | head -n1 )
+    tail -n +0 -F $LATEST_LOG | ./visualiser.ls
+else
+    echo "No 'logs' folder found" >&2
+fi

@@ -1,19 +1,14 @@
-require! <[ http open shoe ]>
+#!node_modules/LiveScript/bin/lsc
+require! <[ fs http open shoe split ]>
 ecstatic = (require \ecstatic) \visualiser
 
-init = (port=8000) ->
+port = 8000
 
-  last-stream = null
+server = http.create-server ecstatic
+  ..listen port
 
-  server = http.create-server ecstatic
-    ..listen port
+sock = shoe (stream) ->
+  process.stdin .pipe split! .pipe stream
+sock.install server, \/racedata
 
-  sock = shoe -> last-stream := it
-  sock.install server, \/racedata
-
-  open "http://localhost:#port/index.html"
-
-  # Return update function
-  (data) -> last-stream?write JSON.stringify data
-
-module.exports = init
+open "http://localhost:#port/index.html"
