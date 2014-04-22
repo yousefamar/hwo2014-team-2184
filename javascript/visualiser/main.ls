@@ -11,6 +11,7 @@ update-stat-text = ->
   s.select \#track-n-curves    .text (knowledge.track?pieces.filter (.radius) .length or 0)
   s.select \#track-n-straights .text (knowledge.track?pieces.filter (.length) .length or 0)
   s.select \#max-laps          .text (knowledge.max-laps or 0)
+  s.select \#last-tick         .text (knowledge.last-tick or 0)
 
 vis = d3.select \body .append \svg .attr \id \vis
 track = vis.append \g .attr \class \track
@@ -25,8 +26,8 @@ derive-knowledge = (message) ->
     r.track = message.data.race.track
     r.cars = message.data.race.cars
     r.max-laps = message.data.race.race-session.laps
-  if message.msg-type in <[ gameStart carPositions ]>
-    r.last-tick = message.data.game-tick
+  if message.game-tick
+    r.last-tick = that
 
   r
 
