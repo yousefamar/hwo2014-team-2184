@@ -3,28 +3,24 @@ require! \moment
 log = console.log
 start-moment = null
 
-handlers = {}
+# Conforms to [the specs](https://helloworldopen.com/techspec)
 
-# As conforming to specs at https://helloworldopen.com/techspec
+handlers =
+  car-positions : (data) ->
+    [\throttle, 0.6]
 
-handlers.car-positions = (data) ->
-  [\throttle, 0.5]
+  join : (data) ->
+    log "Joined"
 
-handlers.join = (data) ->
-  log "Joined"
+  game-start : (data) ->
+    start-moment := moment!
+    log "Race started (#{start-moment.format!})"
+    [\throttle, 0.6]
 
-handlers.game-start = (data) ->
-  start-moment := moment!
-  log "Race started (#{start-moment.format!})"
-  [\throttle, 0.5]
+  game-end : (data) ->
+    end-moment = moment!
+    duration = moment.duration (end-moment.diff start-moment)
+    log "Race ended (#{end-moment.format!})"
+    log "Duration: #{duration.humanize!}"
 
-handlers.game-end = (data) ->
-  end-moment = moment!
-  duration = moment.duration (end-moment.diff start-moment)
-  log "Race ended (#{end-moment.format!})"
-  log "Duration: #{duration.humanize!}"
-
-
-actuate = (data) -> (data?msg-type? && handlers[data.msg-type]? data) || [\ping]
-
-module.exports = actuate
+module.exports = actuate = -> handlers[it.msg-type]? it
