@@ -1,16 +1,15 @@
-## kill -9 bot
+# *kill -9* bot!
 
-Out to win it, dattebayo.
+![VERY DEAD CODE](http://i.imgur.com/y7mMv2Z.png)
 
-[Tech specs](https://helloworldopen.com/techspec)
-for most recent information. We won't be updating this document in your codebase :)
+Out to win it and become Hokage, dattebayo!!
 
-We're told not to modify the scripts on the main level, because CI servers.
+[Tech specs](https://helloworldopen.com/techspec).
 
-- `./build` - build the bot, i.e. prepare for running
-- `./run <host> <port> [<botname>]` - run the bot synchronously.
+### On CI
 
-The HWO servers build the bots *offline*. No internet. If you need something
-else, it better be checked in.
+The HWO servers build the bots *offline*. Need libs? Check them in.
 
-The CI runs "regularly".
+Don't modify the root-level scripts, because CI.  The CI runs "regularly".
+There's lots of useful info on getting it to work on [the Reddit
+thread](http://www.reddit.com/r/HWO/comments/23i1gb/day_6_continuous_integration/).
