@@ -3,7 +3,10 @@
 # Expects newline-delimited JSON on stdin. Starts a browser and pipes the JSON
 # (split on newlines) to it through a WebSocket.
 
-require! <[ fs http open shoe split ]>
+require! <[ fs http open shoe split child_process ]>
+
+<- child_process.exec "cd visualiser;./compile"
+
 ecstatic = (require \ecstatic) \visualiser
 
 port = 8000

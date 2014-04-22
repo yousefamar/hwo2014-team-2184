@@ -1,0 +1,4 @@
+#!/bin/bash
+# Watch for file changes and browserify-compile LiveScript into browser bundle
+# when appropriate.
+browserify --verbose --debug -t liveify -o bundle.js main.ls
