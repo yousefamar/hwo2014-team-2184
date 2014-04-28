@@ -26,9 +26,9 @@ calc-throttle = -> # use `knowledge` and channel zen
     weight = (0.8 ** i) / lookahead-dist
     # I can't maths
     weight-sum += weight
-    throttle   += weight * switch piece.radius? # is curve
-                           | no   => 1
-                           | yes  => Math.abs(piece.angle/piece.radius)
+    throttle   += weight * switch piece.straight
+                           | yes   => 1
+                           | no  => Math.abs(piece.angle/piece.radius)
   throttle /= weight-sum
   clamp throttle, 0 1
 
@@ -43,11 +43,21 @@ handlers =
     knowledge.self <<< data
     log "We're #{data.name} and coloured #{data.color}!"
 
-  game-init : (data) ->
+  game-init : (data) !->
     knowledge
       ..track     = data.race.track
       ..cars      = data.race.cars
       ..max-laps  = data.race.race-session.laps
+
+    prev-piece = {distance: 0.0, length: 0.0}
+    for piece in knowledge.track.pieces
+      piece.straight = not piece.radius?
+      if not piece.straight
+        piece.length = 2 * Math.PI * piece.radius * piece.angle/360
+      piece.distance = prev-piece.distance + prev-piece.length
+      prev-piece = piece
+
+    knowledge.track.length = prev-piece.distance + prev-piece.length
 
   game-start : (data) ->
     start-moment := moment!
@@ -59,7 +69,12 @@ handlers =
     knowledge.positions = data.positions
     t = calc-throttle!
     #console.log "THROTTLING AT #t"
-    [ \throttle t ]
+    angle = knowledge.self.angle
+
+    current-piece = knowledge.track.pieces[knowledge.self.piece-position.piece-index]
+    knowledge.self.dist-traveled = knowledge.self.piece-position.lap * knowledge.track.length + current-piece.distance + knowledge.self.piece-position.in-piece-distance
+    log "#{knowledge.self.angle},#{knowledge.self.dist-traveled}"
+    [ \throttle 0.6 ]
 
   crash : (data) ->
     knowledge.crashed = true
