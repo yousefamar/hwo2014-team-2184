@@ -4,26 +4,33 @@ log = console.log
 clamp = (num, min, max) -> Math.max min, (Math.min max, num)
 start-moment = null
 
-game-tick = 0
+knowledge =
+  tick  : 0
+  lap   : 0
+  crashed : no
+  self  : {}
+  track : null
+  cars  : null
+  max-laps : null
 
-pieces = null
+calc-throttle = -> # use `knowledge` and channel zen
 
-own-car =
-  turbo-msg      : "TURBO NO JUTSU"
-  is-crashed     : false
-  lookahead-dist : 10pcs
-  calc-throttle : (piece-id) ->
-    throttle = curve = weight-sum = 0
-    for i from piece-id til piece-id + @lookahead-dist
-      piece = pieces[i % pieces.length]
-      weight = (0.8 ** i) / @lookahead-dist
-      # I can't maths
-      weight-sum += weight
-      throttle   += weight * switch piece.radius? # is curve
-                             | no   => 1
-                             | yes  => Math.abs(piece.angle/piece.radius)
-    throttle /= weight-sum
-    clamp throttle, 0 1
+  lookahead-dist = 10
+
+  { self, track : { pieces } } = knowledge
+  piece-id = self.piece-position.piece-index
+
+  throttle = curve = weight-sum = 0
+  for i from piece-id til piece-id + lookahead-dist
+    piece = pieces[i % pieces.length]
+    weight = (0.8 ** i) / lookahead-dist
+    # I can't maths
+    weight-sum += weight
+    throttle   += weight * switch piece.radius? # is curve
+                           | no   => 1
+                           | yes  => Math.abs(piece.angle/piece.radius)
+  throttle /= weight-sum
+  clamp throttle, 0 1
 
 # Conforms to [the specs](https://helloworldopen.com/techspec)
 
@@ -33,12 +40,14 @@ handlers =
     log "Joined"
 
   your-car : (data) ->
-    own-car <<< data
-    log "#{data.name}'s colour is #{data.color}"
+    knowledge.self <<< data
+    log "We're #{data.name} and coloured #{data.color}!"
 
   game-init : (data) ->
-    pieces := data.race.track.pieces
-    log "#{pieces.length} pieces in the track"
+    knowledge
+      ..track     = data.race.track
+      ..cars      = data.race.cars
+      ..max-laps  = data.race.race-session.laps
 
   game-start : (data) ->
     start-moment := moment!
@@ -46,23 +55,24 @@ handlers =
     [\throttle, 1.0]
 
   car-positions : (data) ->
-    for car in data
-      if car.id.name is own-car.name and not own-car.is-crashed
-        throttle = own-car.calc-throttle car.piece-position.piece-index
-        log "Throttle at #throttle"
-        return [\throttle, throttle]
+    knowledge.self = data.filter (.id.name is "kill -9") .0
+    knowledge.positions = data.positions
+    t = calc-throttle!
+    #console.log "THROTTLING AT #t"
+    [ \throttle t ]
 
   crash : (data) ->
-    own-car.is-crashed := true
+    knowledge.crashed = true
     log "#{data.name} crashed"
 
   spawn : (data) ->
-    own-car.is-crashed := false
+    knowledge.crashed = false
     log "#{data.name} respawned"
     [\throttle, 1.0]
 
   lap-finished : (data) ->
-    log "Lap finished"
+    log "Finished lap #{knowledge.lap}"
+    knowledge.lap++
     [\throttle, 1.0]
 
   dnf : (data) ->
@@ -75,8 +85,8 @@ handlers =
 
   turbo-available : (data) ->
     # Burn it all straight away
-    #log "#{own-car.name}: #{own-car.turbo-msg}"
-    #[\turbo, own-car.turbo-msg]
+    #log "#{knowledge.self.name}: #{knowledge.self.turbo-msg}"
+    #[\turbo, knowledge.self.turbo-msg]
 
   game-end : (data) ->
     end-moment = moment!
