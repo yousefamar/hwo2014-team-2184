@@ -5,6 +5,7 @@ clamp = (num, min, max) -> Math.max min, (Math.min max, num)
 start-moment = null
 
 knowledge =
+  prev-track-position : 0
   tick  : 0
   lap   : 0
   crashed : no
@@ -24,9 +25,37 @@ model =
 calc-throttle = -> # use `knowledge` and channel zen
 
   { self, track : { pieces } } = knowledge
+
+  track-position = do
+    piece-length = ->
+      if it.length then that else
+        2 * Math.PI * it.radius / 360 * it.angle
+
+    track-length = pieces
+      .reduce do
+        (total, piece) -> total + piece-length piece
+        0
+
+    { piece-index, in-piece-distance } = self.piece-position
+
+    length-travelled = do
+      passed-length = pieces.slice 0, piece-index
+        .reduce do
+          (total, piece) -> total + piece-length piece
+          0
+      on-length = in-piece-distance / 100 * piece-length pieces[piece-index]
+      passed-length + on-length
+    length-travelled / track-length # XXX approximates without lanes
+
   piece-id = self.piece-position.piece-index
 
   potential-throttles = [ 0 to 1 by 0.1 ]
+
+  console.log "pos #{track-position.to-fixed 4}"
+  speed = track-position - knowledge.prev-track-position
+  console.log "spd #{speed.to-fixed 4}"
+
+  knowledge.prev-track-position = track-position
 
   # Try all possible controls, see what doesn't kill us
   potential-throttles.reduce (best-so-far, throttle) ->
