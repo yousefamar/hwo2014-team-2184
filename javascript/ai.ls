@@ -1,7 +1,7 @@
 require! \moment
 
 log = console.log
-clamp = (num, min, max) -> if num < min then min else if num > max then max else num
+clamp = (num, min, max) -> Math.max min, (Math.min max, num)
 start-moment = null
 
 game-tick = 0
@@ -9,21 +9,21 @@ game-tick = 0
 pieces = null
 
 own-car =
-  turbo-msg : "TURBO NO JUTSU"
-  is-crashed : false
-  lookahead-dist: 10pcs
-  calc-throttle: (piece-id) ->
-    throttle = 0.0
-    curve = 0.0
-    weight-sum = 0.0
-    for i from piece-id til piece-id+this.lookahead-dist by 1
-      piece = pieces[i%pieces.length]
-      weight = (0.8**i)/this.lookahead-dist
+  turbo-msg      : "TURBO NO JUTSU"
+  is-crashed     : false
+  lookahead-dist : 10pcs
+  calc-throttle : (piece-id) ->
+    throttle = curve = weight-sum = 0
+    for i from piece-id til piece-id + @lookahead-dist
+      piece = pieces[i % pieces.length]
+      weight = (0.8 ** i) / @lookahead-dist
       # I can't maths
       weight-sum += weight
-      throttle += if piece.radius? then weight * Math.abs(piece.angle/piece.radius) else weight * 1.0
+      throttle   += weight * switch piece.radius? # is curve
+                             | no   => 1
+                             | yes  => Math.abs(piece.angle/piece.radius)
     throttle /= weight-sum
-    clamp throttle, 0.0, 1.0
+    clamp throttle, 0 1
 
 # Conforms to [the specs](https://helloworldopen.com/techspec)
 
@@ -31,9 +31,9 @@ own-car =
 handlers =
   join : (data) ->
     log "Joined"
-  
+
   your-car : (data) ->
-    own-car <<<< data
+    own-car <<< data
     log "#{data.name}'s colour is #{data.color}"
 
   game-init : (data) ->
