@@ -6,26 +6,24 @@ start-moment = null
 
 game-tick = 0
 
+pieces = null
+
 own-car =
   turbo-msg : "TURBO NO JUTSU"
   is-crashed : false
-  pid :
-    angle-target : 45.0
-    pid-constants :
-      kp : 0.019
-      ki : 0.01
-      kd : 0.5
-    _prev-error : 0.0
-    _sum-error : 0.0
-    calc-throttle : (angle) ->
-      error = this.angle-target - Math.abs(angle)
-      this._sum-error += error
-      this._sum-error := 0.01 * clamp this._sum-error, 0.0, this.angle-target
-      d-error = error - this._prev-error
-      this._prev-error = error
-      throttle = clamp (this.pid-constants.kp * error + this.pid-constants.ki * this._sum-error + this.pid-constants.kd * d-error), 0.0, 1.0
-      log "Throttle at #throttle"
-      throttle
+  lookahead-dist: 10pcs
+  calc-throttle: (piece-id) ->
+    throttle = 0.0
+    curve = 0.0
+    weight-sum = 0.0
+    for i from piece-id til piece-id+this.lookahead-dist by 1
+      piece = pieces[i%pieces.length]
+      weight = (0.8**i)/this.lookahead-dist
+      # I can't maths
+      weight-sum += weight
+      throttle += if piece.radius? then weight * Math.abs(piece.angle/piece.radius) else weight * 1.0
+    throttle /= weight-sum
+    clamp throttle, 0.0, 1.0
 
 # Conforms to [the specs](https://helloworldopen.com/techspec)
 
@@ -39,6 +37,8 @@ handlers =
     log "#{data.name}'s colour is #{data.color}"
 
   game-init : (data) ->
+    pieces := data.race.track.pieces
+    log "#{pieces.length} pieces in the track"
 
   game-start : (data) ->
     start-moment := moment!
@@ -48,7 +48,9 @@ handlers =
   car-positions : (data) ->
     for car in data
       if car.id.name is own-car.name and not own-car.is-crashed
-        return [\throttle, own-car.pid.calc-throttle car.angle]
+        throttle = own-car.calc-throttle car.piece-position.piece-index
+        log "Throttle at #throttle"
+        return [\throttle, throttle]
 
   crash : (data) ->
     own-car.is-crashed := true
