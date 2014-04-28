@@ -5,32 +5,44 @@ clamp = (num, min, max) -> Math.max min, (Math.min max, num)
 start-moment = null
 
 knowledge =
+  prev-track-position : 0
   tick  : 0
   lap   : 0
   crashed : no
+  turbo-available : no
   self  : {}
   track : null
   cars  : null
   max-laps : null
 
+model =
+  hold : (throttle, angle, curve) ->
+    # returns whether a car with `throttle` at an `angle` on curve of `{ angle,
+    # radius }` will stay on track (i.e. not crash).
+    if (throttle > 0.8) or (Math.abs angle > 10 and throttle > 0.4)
+      then false else true
+
 calc-throttle = -> # use `knowledge` and channel zen
 
-  lookahead-dist = 10
-
   { self, track : { pieces } } = knowledge
+
+  track-position = self.dist-traveled
+
   piece-id = self.piece-position.piece-index
 
-  throttle = curve = weight-sum = 0
-  for i from piece-id til piece-id + lookahead-dist
-    piece = pieces[i % pieces.length]
-    weight = (0.8 ** i) / lookahead-dist
-    # I can't maths
-    weight-sum += weight
-    throttle   += weight * switch piece.straight
-                           | yes   => 1
-                           | no  => Math.abs(piece.angle/piece.radius)
-  throttle /= weight-sum
-  clamp throttle, 0 1
+  potential-throttles = [ 0 to 1 by 0.1 ]
+
+  console.log "pos #{track-position.to-fixed 4}"
+  speed = track-position - knowledge.prev-track-position
+  console.log "spd #{speed.to-fixed 4}"
+
+  knowledge.prev-track-position = track-position
+
+  # Try all possible controls, see what doesn't kill us
+  potential-throttles.reduce (best-so-far, throttle) ->
+    if model.hold throttle, self.angle, pieces[piece-id]
+      throttle
+    else best-so-far
 
 # Conforms to [the specs](https://helloworldopen.com/techspec)
 
@@ -67,14 +79,14 @@ handlers =
   car-positions : (data) ->
     knowledge.self = data.filter (.id.name is "kill -9") .0
     knowledge.positions = data.positions
-    t = calc-throttle!
-    #console.log "THROTTLING AT #t"
     angle = knowledge.self.angle
 
     current-piece = knowledge.track.pieces[knowledge.self.piece-position.piece-index]
     knowledge.self.dist-traveled = knowledge.self.piece-position.lap * knowledge.track.length + current-piece.distance + knowledge.self.piece-position.in-piece-distance
     log "#{knowledge.self.angle},#{knowledge.self.dist-traveled}"
-    [ \throttle 0.6 ]
+    t = calc-throttle!
+    #console.log "THROTTLING AT #t"
+    [ \throttle t ]
 
   crash : (data) ->
     knowledge.crashed = true
@@ -101,7 +113,7 @@ handlers =
   turbo-available : (data) ->
     # Burn it all straight away
     #log "#{knowledge.self.name}: #{knowledge.self.turbo-msg}"
-    #[\turbo, knowledge.self.turbo-msg]
+    [\turbo, knowledge.self.turbo-msg]
 
   game-end : (data) ->
     end-moment = moment!
